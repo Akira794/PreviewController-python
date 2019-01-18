@@ -5,6 +5,7 @@ import numpy as np              # Numerical library
 from scipy import *             # Load the scipy functions
 from control.matlab import *    # Load the controls systems library
 from matplotlib import pyplot as plt
+import curve_fitting as cfg
 
 def drange(begin, end, step):
     n = begin
@@ -13,54 +14,7 @@ def drange(begin, end, step):
      yield n
      n += step
 
-dist = [0.6, 0.05, ( 3.14/2.0) ]
-max_step_x = 0.1
-max_step_y = 0.05
-max_step_w = 0.2;
-period = 0.32
-foot_y = 0.06
-
-step_num_x = int(abs(dist[0])/max_step_x)
-step_num_y = int(abs(dist[1])/max_step_y)
-step_num_w = int(abs(dist[2])/max_step_w)
-step_num = max([step_num_x, step_num_y, step_num_w])
-
-if (step_num_x == step_num):
-    step_x = sign(dist[0])*min(abs(dist[0]), max_step_x)
-    step_y = dist[1]/abs(dist[0])*max_step_x
-    step_w = dist[2]/abs(dist[0])*max_step_x
-elif (step_num_y == step_num):
-    step_x = dist[0]/abs(dist[1])*max_step_y
-    step_y = sign(dist[1])*min(abs(dist[1]), max_step_y)
-    step_w = dist[2]/abs(dist[1])*max_step_y
-elif (step_num_w == step_num):
-    step_x = dist[0]/abs(dist[2])*max_step_w
-    step_y = dist[1]/abs(dist[2])*max_step_w
-    step_w = sign(dist[2])*min(abs(dist[2]), max_step_w)
-
-step = np.array([0.0, 0.0, 0.0])
-foot = [step]
-foot.append(np.array([period, 0.0, foot_y]))
-rot = 0
-
-for i in drange(1, step_num, 1):
-    shift_y = foot_y * ((divmod(i,2)[1])*2-1)*2*(-1)
-    foot_rd = [step_x, step_y+shift_y]
-    foot_fd = [foot_rd[0]*cos(rot)-foot_rd[1]*sin(rot), foot_rd[0]*sin(rot)+foot_rd[1]*cos(rot)]
-    rot = rot + step_w
-    foot.append(np.array([foot[i][0] + period, foot[i][1] + foot_fd[0], foot[i][2] + foot_fd[1]]))
-
-foot_rd = [dist[0]-step_x*step_num, dist[1]-step_y*step_num-shift_y]
-foot_fd = [foot_rd[0]*cos(rot)-foot_rd[1]*sin(rot), foot_rd[0]*sin(rot)+foot_rd[1]*cos(rot)]
-foot.append(np.array([foot[i+1][0] + period, foot[i+1][1] + foot_fd[0], foot[i+1][2] + foot_fd[1]]))
-
-rot = dist[2]
-foot_rd = [0,shift_y/2]
-foot_fd = [foot_rd[0]*cos(rot)-foot_rd[1]*sin(rot), foot_rd[0]*sin(rot)+foot_rd[1]*cos(rot)]
-foot.append(np.array([foot[i+2][0] + period, foot[i+2][1] + foot_fd[0], foot[i+2][2] + foot_fd[1]]))
-foot.append(np.array([100, 0, 0]))
-
-#foot = [[0, 0, 0], [0.6, 0.1, 0.06], [0.9, 0.2, -0.06], [1.2, 0.3, 0.06], [1.5, 0.4, -0.06],[1.8, 0.5, 0.06], [2.4, 0.6, -0.06], [3.0, 0.7, 0.0],[100,0,0]]
+foot = [[0, 0, 0], [0.6, 0.1, 0.06], [0.9, 0.2, -0.06], [1.2, 0.3, 0.06], [1.5, 0.4, -0.06],[1.8, 0.5, 0.06], [2.4, 0.6, -0.06], [3.0, 0.7, 0.0],[100,0,0]]
 forward_period = 1.0
 calculate_period = 4.0
 
@@ -102,6 +56,7 @@ y = np.matrix([[0],[0],[0]])
 xp = x;
 yp = y;
 
+t = np.arange(0,calculate_period + dt,dt)
 i = 1;
 n = 0;
 prefx = []
@@ -117,7 +72,7 @@ times = []
 
 for tt in drange(0, calculate_period+forward_period+1-dt, dt):
     time = float(format(round(tt, 3)))
-    if(abs(time-foot[n][0])<(dt/2)):
+    if(time == foot[n][0]):
         prefx.append(foot[n][1])
         prefy.append(foot[n][2])
         #print(i, time, foot[n][1])
@@ -172,43 +127,45 @@ for ttn in drange(0,calculate_period-dt,dt):
     y2.append(float(py))
     times.append(tt)
     i = i + 1
-"""
+
+#pp = np.polyfit(x0, y0, 5)
+#fp = np.poly1d(pp)
+###################################################################
+n = 60
+x_in = []
+y_in = []
+#test = [float(format(round(i,3))) for i in drange(n,foot[1][1],dt)]
+for i in range(0,n+1):
+    x_in.append(x0[i])
+    y_in.append(y0[i])
+
+cf = cfg.CurveFitting(x_in,y_in,5)
+cf.calc_polynomial_fitting()
+
+#print(x0[60])
+#print(x1[60])
+#print(x2[60])
+
+#cf = cfg.CurveFitting(x0,y0,5)
+#cf.calc_polynomial_fitting()
+p = []
+for num in x_in:
+    p.append(cf.out_y(num))
+
 g = plt.subplot(2,1,1)
 g.plot(x0, y0, color="red",label="$COM$")
+g.plot(x_in, p, label="$COM polyfit$" )
 g.plot(x1, y1, color="green",label="$refZMP$")
 g.plot(x2, y2, "*",label="$ZMP$")
-g.set_aspect('equal')
+g.legend(bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0, fontsize=8)
 r = plt.subplot(2,1,2)
+
 r.plot(times, x0, color="red",label="$COM X$")
 r.plot(times, x1, color="blue",label="$refZMPX$")
 r.plot(times, x2, color="lime",label="$ZMP X$")
 r.plot(times, y0, color="green",label="$COM Y$")
 r.plot(times, y1, color="cyan",label="$refZMPY$")
 r.plot(times, y2, color="violet",label="$ZMP Y$")
-plt.savefig('preview_control_rot.png')
+r.legend(bbox_to_anchor=(1, 0.9), loc='upper right', borderaxespad=0, fontsize=8)
+plt.savefig('preview_control-polynomial.png')
 plt.show()
-"""
-plt.xlabel('t(s)')
-plt.ylabel('dist(m)')
-plt.plot(times, x0, color="red",label="$COM X$")
-plt.plot(times, x1, color="blue",label="$refZMPX$")
-plt.plot(times, x2, color="lime",label="$ZMP X$")
-plt.plot(times, y0, color="green",label="$COM Y$")
-plt.plot(times, y1, color="cyan",label="$refZMPY$")
-plt.plot(times, y2, color="violet",label="$ZMP Y$")
-plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
-plt.savefig('preview_control_rot_tx_ty.png')
-plt.show()
-"""
-plt.xlim(-0.1,0.5)
-plt.ylim(-0.10,0.5)
-plt.xlabel('x(m)')
-plt.ylabel('y(m)')
-plt.axes().set_aspect('equal')
-plt.plot(x0, y0, color="red",label="$COM$")
-plt.plot(x1, y1, color="green",label="$refZMP$")
-plt.plot(x2, y2, "*",label="$ZMP$")
-plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
-plt.savefig('previewcontroller_walk_rot_COM.png')
-plt.show()
-"""

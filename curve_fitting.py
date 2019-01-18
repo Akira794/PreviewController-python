@@ -31,14 +31,14 @@ class CurveFitting():
         #print(A)
         #print(T)
         self.W = np.linalg.solve(A,T)
-        #print(self.W)
+        print(self.W)
 
     def out_y(self, x_range):
         result = self.W[0]
         for k in range(self.dim+1):
             result += self.W[k]*pow(x_range,k)
         return result
-
+"""
 x = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
 y = [0.0, 1.0, 2.0, 4.5, 8.0, 12.5, 20.0, 30.5, 35, 40.5, 50]
 CF = CurveFitting(x,y,5)
@@ -51,3 +51,4 @@ for i in x:
 plt.plot(x,y,color="red",label="$Base$")
 plt.plot(x,p,color="green",label="$CurveFitting$")
 plt.show()
+"""

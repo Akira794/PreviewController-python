@@ -17,7 +17,7 @@ dist = [0.6, 0.05, ( 3.14/2.0) ]
 max_step_x = 0.1
 max_step_y = 0.05
 max_step_w = 0.2;
-period = 0.32
+period = 0.3
 foot_y = 0.06
 
 step_num_x = int(abs(dist[0])/max_step_x)
@@ -172,6 +172,7 @@ for ttn in drange(0,calculate_period-dt,dt):
     y2.append(float(py))
     times.append(tt)
     i = i + 1
+
 """
 g = plt.subplot(2,1,1)
 g.plot(x0, y0, color="red",label="$COM$")
@@ -188,20 +189,73 @@ r.plot(times, y2, color="violet",label="$ZMP Y$")
 plt.savefig('preview_control_rot.png')
 plt.show()
 """
-plt.xlabel('t(s)')
-plt.ylabel('dist(m)')
-plt.plot(times, x0, color="red",label="$COM X$")
-plt.plot(times, x1, color="blue",label="$refZMPX$")
-plt.plot(times, x2, color="lime",label="$ZMP X$")
-plt.plot(times, y0, color="green",label="$COM Y$")
-plt.plot(times, y1, color="cyan",label="$refZMPY$")
-plt.plot(times, y2, color="violet",label="$ZMP Y$")
-plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
-plt.savefig('preview_control_rot_tx_ty.png')
-plt.show()
+step_times = []
+step1_x = []
+step1_y = []
+coefficient_x = []
+coefficient_y = []
+poly_x = []
+poly_y = []
+poly_t = []
+
+
+
+num = 0
+
+one_step = 30#30
+start_step = one_step
+for n_step in range(len(foot)):
+    #if(n_step > 0 and n_step < len(foot)-2 ):
+    if(n_step < len(foot)-1 ):
+        #print(n_step*(one_step)+1, (n_step+1)*(one_step)+1)
+        for num in range(n_step*(one_step)+1, (n_step+1)*(one_step)+1):
+            step1_x.append(x0[num])
+            step1_y.append(y0[num])
+            step_times.append(times[num])
+
+        res_x = np.polyfit(step_times,step1_x, 5)
+        res_y = np.polyfit(step_times,step1_y, 5)
+        pl_x = np.poly1d(res_x)
+        pl_y = np.poly1d(res_y)
+        poly_x.append(pl_x)
+        poly_y.append(pl_y)
+        poly_t.append(np.array(step_times))
+        coefficient_x.append(res_x)
+        coefficient_y.append(res_y)
+
+        step_times.clear()
+        step1_x.clear()
+        step1_y.clear()
+print("")
+check_t = []
+for d_num in range(len(poly_t)):
+    p = poly_t[d_num].tolist()
+    five = coefficient_x[d_num][0]
+    four = coefficient_x[d_num][1]
+    three= coefficient_x[d_num][2]
+    two  = coefficient_x[d_num][3]
+    one  = coefficient_x[d_num][4]
+    zero = coefficient_x[d_num][5]
+
+    five_y = coefficient_y[d_num][0]
+    four_y = coefficient_y[d_num][1]
+    three_y= coefficient_y[d_num][2]
+    two_y  = coefficient_y[d_num][3]
+    one_y  = coefficient_y[d_num][4]
+    zero_y = coefficient_y[d_num][5]
+
+    for count in range(len(p)):
+        c_time = p[count]
+        coe_x = five * pow(c_time,5) + four * pow(c_time,4) + three * pow(c_time,3) + two * pow(c_time,2) + one * c_time + zero
+        coe_y = five_y * pow(c_time,5) + four_y * pow(c_time,4) + three_y * pow(c_time,3) + two_y * pow(c_time,2) + one_y * c_time + zero_y
+
+        print(c_time, coe_x, coe_y )
+
+    #p = coefficient_t[d_num].tolist()
+    #coefficient_x[d_num](p)
+    #coefficient_y[d_num](p)
+
 """
-plt.xlim(-0.1,0.5)
-plt.ylim(-0.10,0.5)
 plt.xlabel('x(m)')
 plt.ylabel('y(m)')
 plt.axes().set_aspect('equal')
@@ -210,5 +264,32 @@ plt.plot(x1, y1, color="green",label="$refZMP$")
 plt.plot(x2, y2, "*",label="$ZMP$")
 plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
 plt.savefig('previewcontroller_walk_rot_COM.png')
+plt.show()
+
+plt.xlabel('t(s)')
+plt.ylabel('dist(m)')
+
+p = []
+list_draw_x = ['k','c','k','c','k','c','k','c','k','c','k']
+list_draw_y = ['r','y','r','y','r','y','r','y','r','y','r']
+for d_num in range(len(poly_t)):
+    p = poly_t[d_num].tolist()
+    plt.plot(p, poly_x[d_num](p), color = list_draw_x[d_num])#color="red")
+    plt.plot(p, poly_y[d_num](p), color = list_draw_y[d_num])#color="green")
+plt.plot(p, poly_x[d_num](p), color="k",label="$POLY COM X$")
+plt.plot(p, poly_y[d_num](p), color="r",label="$POLY COM Y$")
+#plt.plot(x0, y0, color="red",label="$COM$")
+#plt.plot(x1, y1, color="green",label="$refZMP$")
+#plt.plot(x2, y2, "*",label="$ZMP$")
+#plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
+#plt.savefig('PC_walk_rot_COM.png')
+plt.plot(times, x0, linestyle = "dotted",color="green",label="$COM X$")
+#plt.plot(times, x1, color="blue",label="$refZMPX$")
+#plt.plot(times, x2, color="lime",label="$ZMP X$")
+plt.plot(times, y0, linestyle = "dotted",color="blue",label="$COM Y$")
+#plt.plot(times, y1, color="cyan",label="$refZMPY$")
+#plt.plot(times, y2, color="violet",label="$ZMP Y$")
+plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
+#plt.savefig('polynomial_COM_trajectory_txty.png')
 plt.show()
 """
