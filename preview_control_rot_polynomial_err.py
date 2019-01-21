@@ -19,7 +19,7 @@ def rad2deg(radian):
 def deg2rad(deg):
     return deg * pi / 180
 
-dist = [0.6, 0.05, deg2rad(90) ]#( 3.14/2.0)
+dist = [0.6, 0.05, deg2rad(0) ]#( 3.14/2.0)
 max_step_x = 0.1
 max_step_y = 0.05
 max_step_w = 0.2;
@@ -65,8 +65,9 @@ foot_rd = [0,shift_y/2]
 foot_fd = [foot_rd[0]*cos(rot)-foot_rd[1]*sin(rot), foot_rd[0]*sin(rot)+foot_rd[1]*cos(rot)]
 foot.append(np.array([foot[i+2][0] + period, foot[i+2][1] + foot_fd[0], foot[i+2][2] + foot_fd[1]]))
 foot.append(np.array([100, 0, 0]))
-
-#foot = [[0, 0, 0], [0.6, 0.1, 0.06], [0.9, 0.2, -0.06], [1.2, 0.3, 0.06], [1.5, 0.4, -0.06],[1.8, 0.5, 0.06], [2.4, 0.6, -0.06], [3.0, 0.7, 0.0],[100,0,0]]
+print(foot)
+foot = [[0, 0, 0], [0.3, 0, 0.06], [0.6, 0.1, -0.06], [0.9, 0.2, 0.06], [1.2, 0.3, -0.06], [1.5, 0.4, 0.06],[1.8, 0.5, -0.06], [2.1, 0.6, 0.06], [2.4, 0.6, 0.0],[100,0,0]]
+print(foot)
 forward_period = 1.6
 calculate_period = 4.0
 
