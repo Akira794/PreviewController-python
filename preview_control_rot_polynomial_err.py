@@ -13,7 +13,13 @@ def drange(begin, end, step):
      yield n
      n += step
 
-dist = [0.6, 0.05, ( 3.14/2.0) ]
+def rad2deg(radian):
+    return radian * 180/pi
+
+def deg2rad(deg):
+    return deg * pi / 180
+
+dist = [0.6, 0.05, deg2rad(90) ]#( 3.14/2.0)
 max_step_x = 0.1
 max_step_y = 0.05
 max_step_w = 0.2;
@@ -61,7 +67,7 @@ foot.append(np.array([foot[i+2][0] + period, foot[i+2][1] + foot_fd[0], foot[i+2
 foot.append(np.array([100, 0, 0]))
 
 #foot = [[0, 0, 0], [0.6, 0.1, 0.06], [0.9, 0.2, -0.06], [1.2, 0.3, 0.06], [1.5, 0.4, -0.06],[1.8, 0.5, 0.06], [2.4, 0.6, -0.06], [3.0, 0.7, 0.0],[100,0,0]]
-forward_period = 1.0
+forward_period = 1.6
 calculate_period = 4.0
 
 dt = 0.01
@@ -197,8 +203,12 @@ coefficient_y = []
 poly_x = []
 poly_y = []
 poly_t = []
+count_time = []
 
-
+resultcom_x = []
+resultcom_y = []
+resultvel_x = []
+resultvel_y = []
 
 num = 0
 
@@ -226,8 +236,10 @@ for n_step in range(len(foot)):
         step_times.clear()
         step1_x.clear()
         step1_y.clear()
-print("")
-check_t = []
+
+counter = 0
+resultcom_x.append(0)
+resultcom_y.append(0)
 for d_num in range(len(poly_t)):
     p = poly_t[d_num].tolist()
     five = coefficient_x[d_num][0]
@@ -244,52 +256,60 @@ for d_num in range(len(poly_t)):
     one_y  = coefficient_y[d_num][4]
     zero_y = coefficient_y[d_num][5]
 
+    #print(five, four, three, two, one, zero, "\t", five_y, four_y, three_y, two_y, one_y, zero_y,)
+
     for count in range(len(p)):
         c_time = p[count]
-        coe_x = five * pow(c_time,5) + four * pow(c_time,4) + three * pow(c_time,3) + two * pow(c_time,2) + one * c_time + zero
-        coe_y = five_y * pow(c_time,5) + four_y * pow(c_time,4) + three_y * pow(c_time,3) + two_y * pow(c_time,2) + one_y * c_time + zero_y
+        com_x = five * pow(c_time,5) + four * pow(c_time,4) + three * pow(c_time,3) + two * pow(c_time,2) + one * c_time + zero
+        com_y = five_y * pow(c_time,5) + four_y * pow(c_time,4) + three_y * pow(c_time,3) + two_y * pow(c_time,2) + one_y * c_time + zero_y
+        vel_x = 5*five * pow(c_time,4) + 4*four * pow(c_time,3) + 3*three * pow(c_time,2) + 2*two * c_time + one
+        vel_y = 5*five_y * pow(c_time,4) + 4*four_y * pow(c_time,3) + 3*three_y * pow(c_time,2) + 2*two_y * c_time + one_y
 
-        print(c_time, coe_x, coe_y )
+        resultcom_x.append(com_x)
+        resultcom_y.append(com_y)
+        resultvel_x.append(vel_x)
+        resultvel_y.append(vel_y)
+        count_time.append(counter)
 
-    #p = coefficient_t[d_num].tolist()
-    #coefficient_x[d_num](p)
-    #coefficient_y[d_num](p)
+        counter = counter + 1
 
-"""
-plt.xlabel('x(m)')
-plt.ylabel('y(m)')
+
+av_x = []
+av_y = []
+
+for number in count_time:
+    count = number + 1
+    #print(count, times[count], x0[count], y0[count], resultcom_x[count], resultcom_y[count])#, resultvel_x[count], resultvel_y[count])
+    av_x.append(abs(x0[count] - resultcom_x[count]))
+    av_y.append(abs(y0[count] - resultcom_y[count]))
+
+print("x, y max error")
+print(max(av_x), max(av_y))
+
+
+plt.xlabel('x[m]')
+plt.ylabel('y[m]')
 plt.axes().set_aspect('equal')
 plt.plot(x0, y0, color="red",label="$COM$")
 plt.plot(x1, y1, color="green",label="$refZMP$")
 plt.plot(x2, y2, "*",label="$ZMP$")
 plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
-plt.savefig('previewcontroller_walk_rot_COM.png')
+#plt.savefig('previewcontroller_walk_rot_COM.png')
 plt.show()
-
-plt.xlabel('t(s)')
-plt.ylabel('dist(m)')
+"""
+plt.xlabel('t[sec]')
+plt.ylabel('dist[m]')
 
 p = []
-list_draw_x = ['k','c','k','c','k','c','k','c','k','c','k']
-list_draw_y = ['r','y','r','y','r','y','r','y','r','y','r']
 for d_num in range(len(poly_t)):
     p = poly_t[d_num].tolist()
-    plt.plot(p, poly_x[d_num](p), color = list_draw_x[d_num])#color="red")
-    plt.plot(p, poly_y[d_num](p), color = list_draw_y[d_num])#color="green")
-plt.plot(p, poly_x[d_num](p), color="k",label="$POLY COM X$")
-plt.plot(p, poly_y[d_num](p), color="r",label="$POLY COM Y$")
-#plt.plot(x0, y0, color="red",label="$COM$")
-#plt.plot(x1, y1, color="green",label="$refZMP$")
-#plt.plot(x2, y2, "*",label="$ZMP$")
-#plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
-#plt.savefig('PC_walk_rot_COM.png')
+    plt.plot(p, poly_x[d_num](p), color ="red")
+    plt.plot(p, poly_y[d_num](p), color ="darkblue")#color="red")
+plt.plot(p, poly_x[d_num](p), color="red",label="$POLY COM X$")
+plt.plot(p, poly_y[d_num](p), color="darkblue",label="$POLY COM Y$")
 plt.plot(times, x0, linestyle = "dotted",color="green",label="$COM X$")
-#plt.plot(times, x1, color="blue",label="$refZMPX$")
-#plt.plot(times, x2, color="lime",label="$ZMP X$")
-plt.plot(times, y0, linestyle = "dotted",color="blue",label="$COM Y$")
-#plt.plot(times, y1, color="cyan",label="$refZMPY$")
-#plt.plot(times, y2, color="violet",label="$ZMP Y$")
+plt.plot(times, y0, linestyle = "dotted",color="orangered",label="$COM Y$")
 plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
-#plt.savefig('polynomial_COM_trajectory_txty.png')
+plt.savefig('polynomial_COM_trajectory_txty.png')
 plt.show()
 """

@@ -61,7 +61,7 @@ foot.append(np.array([foot[i+2][0] + period, foot[i+2][1] + foot_fd[0], foot[i+2
 foot.append(np.array([100, 0, 0]))
 
 #foot = [[0, 0, 0], [0.6, 0.1, 0.06], [0.9, 0.2, -0.06], [1.2, 0.3, 0.06], [1.5, 0.4, -0.06],[1.8, 0.5, 0.06], [2.4, 0.6, -0.06], [3.0, 0.7, 0.0],[100,0,0]]
-forward_period = 1.0
+forward_period = 1.6 #1.0予見時間
 calculate_period = 4.0
 
 dt = 0.01
@@ -188,22 +188,24 @@ r.plot(times, y2, color="violet",label="$ZMP Y$")
 plt.savefig('preview_control_rot.png')
 plt.show()
 """
-plt.xlabel('t(s)')
-plt.ylabel('dist(m)')
+
+plt.xlabel('t[sec]')
+plt.ylabel('dist[m]')
 plt.plot(times, x0, color="red",label="$COM X$")
-plt.plot(times, x1, color="blue",label="$refZMPX$")
+plt.plot(times, x1, linestyle = "dotted", color="blue",label="$refZMPX$")
 plt.plot(times, x2, color="lime",label="$ZMP X$")
 plt.plot(times, y0, color="green",label="$COM Y$")
-plt.plot(times, y1, color="cyan",label="$refZMPY$")
+plt.plot(times, y1, linestyle = "dotted", color="k",label="$refZMPY$")
 plt.plot(times, y2, color="violet",label="$ZMP Y$")
 plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
 plt.savefig('preview_control_rot_tx_ty.png')
 plt.show()
+
 """
 plt.xlim(-0.1,0.5)
 plt.ylim(-0.10,0.5)
-plt.xlabel('x(m)')
-plt.ylabel('y(m)')
+plt.xlabel('x[m]')
+plt.ylabel('y[m]')
 plt.axes().set_aspect('equal')
 plt.plot(x0, y0, color="red",label="$COM$")
 plt.plot(x1, y1, color="green",label="$refZMP$")

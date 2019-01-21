@@ -242,14 +242,15 @@ plt.xlabel('t(s)')
 plt.ylabel('dist(m)')
 
 p = []
-list_draw_x = ['k','c','k','c','k','c','k','c','k','c','k']
-list_draw_y = ['r','y','r','y','r','y','r','y','r','y','r']
+
 for d_num in range(len(coefficient_t)):
     p = coefficient_t[d_num].tolist()
-    plt.plot(p, coefficient_x[d_num](p), color = list_draw_x[d_num])#color="red")
-    plt.plot(p, coefficient_y[d_num](p), color = list_draw_y[d_num])#color="green")
-plt.plot(p, coefficient_y[d_num](p), color="k",label="$POLY COM X$")
-plt.plot(p, coefficient_y[d_num](p), color="r",label="$POLY COM Y$")
+#    plt.plot(p, coefficient_x[d_num](p), color = list_draw_x[d_num])#color="red")
+#    plt.plot(p, coefficient_y[d_num](p), color = list_draw_y[d_num])#color="green")
+    plt.plot(p, coefficient_x[d_num](p), color ="red")
+    plt.plot(p, coefficient_y[d_num](p), color ="darkblue")#color="red")
+plt.plot(p, coefficient_y[d_num](p), color="red",label="$POLY COM X$")
+plt.plot(p, coefficient_y[d_num](p), color="darkblue",label="$POLY COM Y$")
 #plt.plot(x0, y0, color="red",label="$COM$")
 #plt.plot(x1, y1, color="green",label="$refZMP$")
 #plt.plot(x2, y2, "*",label="$ZMP$")
@@ -258,7 +259,7 @@ plt.plot(p, coefficient_y[d_num](p), color="r",label="$POLY COM Y$")
 plt.plot(times, x0, linestyle = "dotted",color="green",label="$COM X$")
 #plt.plot(times, x1, color="blue",label="$refZMPX$")
 #plt.plot(times, x2, color="lime",label="$ZMP X$")
-plt.plot(times, y0, linestyle = "dotted",color="blue",label="$COM Y$")
+plt.plot(times, y0, linestyle = "dotted",color="orangered",label="$COM Y$")
 #plt.plot(times, y1, color="cyan",label="$refZMPY$")
 #plt.plot(times, y2, color="violet",label="$ZMP Y$")
 plt.legend(bbox_to_anchor=(0.0, 1.0), loc='upper left', borderaxespad=0, fontsize=10)
